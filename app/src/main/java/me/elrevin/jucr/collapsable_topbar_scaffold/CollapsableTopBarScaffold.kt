@@ -3,18 +3,13 @@ package me.elrevin.jucr.collapsable_topbar_scaffold
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -42,20 +36,34 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 
+/**
+ * Scaffold with collapsable top bar, nested scroll and reaction on lazy list (has to be in content)
+ * scrolling.
+ *
+ * @param modifier The modifier to be applied
+ * @param topBarState State of the top bar
+ * @param topBarContent Content to be placed on top bar
+ * @param bottomBarContent Content to be placed on bottom bar
+ * @param listState State of the lazy list
+ * @param content Content to be placed between the top and bottom bars
+ */
 @Composable
-fun CollapsableTopbarScaffold(
+fun CollapsableTopBarScaffold(
     modifier: Modifier = Modifier,
-    topbarState: TopBarState,
-    topbarContent: (@Composable () -> Unit)? = null,
-    listTitle: (@Composable () -> Unit)? = null,
-    listContent: LazyListScope.() -> Unit,
-    statistics: (@Composable () -> Unit)? = null,
-    bottombarExpandedHeight: Dp = 56.dp,
-    bottombar: (@Composable () -> Unit)? = null
+    indentWidth: Dp = 142.dp,
+    indentHeight: Dp = 38.dp,
+    topBarState: TopBarState,
+    topBarContent: (@Composable () -> Unit)? = null,
+    bottomBarContent: (@Composable () -> Unit)? = null,
+    listState: LazyListState,
+    content: @Composable ColumnScope.() -> Unit
 ) {
+    // scrolling distance in px
     var delta by remember {
         mutableStateOf(0f)
     }
+
+    // list scrolling
     var wasListScrolled by remember {
         mutableStateOf(false)
     }
@@ -64,8 +72,6 @@ fun CollapsableTopbarScaffold(
         mutableStateOf(false)
     }
 
-    val listState = rememberLazyListState()
-
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -73,7 +79,7 @@ fun CollapsableTopbarScaffold(
                 delta = available.y
                 wasListScrolled = listState.isScrollInProgress
                 if (delta < 0f || listState.firstVisibleItemIndex == 0 || !wasListScrolled) {
-                    topbarState.resizeBy(delta)
+                    topBarState.resizeBy(delta)
                 }
                 return Offset.Zero
             }
@@ -88,10 +94,10 @@ fun CollapsableTopbarScaffold(
     LaunchedEffect(key1 = fling, key2 = wasListScrolled, key3 = isFirstListItemVisible(listState)) {
         if (fling) {
             if (delta < 0f) {
-                topbarState.collapse()
+                topBarState.collapse()
             } else {
                 if (listState.firstVisibleItemIndex == 0 || !wasListScrolled) {
-                    topbarState.expand()
+                    topBarState.expand()
                 }
             }
         }
@@ -103,55 +109,34 @@ fun CollapsableTopbarScaffold(
             // attach as a parent to the nested scroll system
             .nestedScroll(nestedScrollConnection)
     ) {
-        Topbar(
-            state = topbarState,
+        TopBar(
+            state = topBarState,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Red),
-            content = topbarContent ?: {
+            content = topBarContent ?: {
                 Text(text = "Delta = $delta")
             }
         )
 
         Box(
             Modifier
-                .padding(top = topbarState.getHeightInDp())
+                .padding(top = topBarState.getHeightInDp() - 38.dp)
                 .fillMaxSize()
-                .clip(IndentShape())
+                .clip(IndentShape(indentWidth, indentHeight))
                 .background(Color.White),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column(
                 Modifier
-                    .padding(bottom = bottombarExpandedHeight)
+                    .padding(bottom = if (bottomBarContent != null) 56.dp else 0.dp)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                if (statistics != null) {
-                    statistics()
-                }
-                if (listTitle != null) {
-                    listTitle()
-                }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    state = listState,
-                    content = listContent
-                )
-            }
+                    .verticalScroll(rememberScrollState()),
+                content = content
+            )
 
-            if (bottombar !== null) {
-                val bottomBarShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(bottombarExpandedHeight)
-                        .clip(bottomBarShape)
-                ) {
-                    bottombar()
-                }
+            if (bottomBarContent !== null) {
+                BottomBar(content = bottomBarContent)
             }
         }
 
@@ -160,7 +145,10 @@ fun CollapsableTopbarScaffold(
 
 fun isFirstListItemVisible(state: LazyListState) = state.firstVisibleItemIndex == 0
 
-class IndentShape() : Shape {
+class IndentShape(
+    private val indentWidth: Dp,
+    private val indentHeight: Dp,
+) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -172,24 +160,24 @@ class IndentShape() : Shape {
                 val h = size.height
                 val d = density.density
                 val cR = 12 * d
-                val indentHeight = 38 * d
-                val indentWidth = 142 * d
+                val indentHeightPx: Float = indentHeight.value * d
+                val indentWidthPx: Float = indentWidth.value * d
 
-                val indentStart = (w - indentWidth) / 2 - cR
-                val indentEnd = (w + indentWidth) / 2 - cR
+                val indentStart = (w - indentWidthPx) / 2 - cR
+                val indentEnd = (w + indentWidthPx) / 2 - cR
 
                 val indentD1 = 30 * d
-                val indentX3 = indentStart + indentWidth / 2
+                val indentX3 = indentStart + indentWidthPx / 2
 
                 moveTo(cR, 0f)
                 lineTo(indentStart, 0f)
                 cubicTo(
                     indentStart + indentD1, 0f,
-                    indentStart + indentD1, indentHeight,
-                    indentX3, indentHeight
+                    indentStart + indentD1, indentHeightPx,
+                    indentX3, indentHeightPx
                 )
                 cubicTo(
-                    indentEnd - indentD1, indentHeight,
+                    indentEnd - indentD1, indentHeightPx,
                     indentEnd - indentD1, 0f,
                     indentEnd, 0f
                 )
