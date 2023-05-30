@@ -112,8 +112,7 @@ fun CollapsableTopBarScaffold(
         TopBar(
             state = topBarState,
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Red),
+                .fillMaxWidth(),
             content = topBarContent ?: {
                 Text(text = "Delta = $delta")
             }
@@ -156,17 +155,17 @@ class IndentShape(
     ): Outline =
         Outline.Generic(
             Path().apply {
-                val w = size.width
-                val h = size.height
-                val d = density.density
-                val cR = 12 * d
-                val indentHeightPx: Float = indentHeight.value * d
-                val indentWidthPx: Float = indentWidth.value * d
+                val width = size.width
+                val height = size.height
+                val densityPx = density.density
+                val cR = 12 * densityPx
+                val indentHeightPx: Float = indentHeight.value * densityPx
+                val indentWidthPx: Float = indentWidth.value * densityPx
 
-                val indentStart = (w - indentWidthPx) / 2 - cR
-                val indentEnd = (w + indentWidthPx) / 2 - cR
+                val indentStart = (width - indentWidthPx) / 2
+                val indentEnd = (width + indentWidthPx) / 2
 
-                val indentD1 = 30 * d
+                val indentD1 = 30 * densityPx
                 val indentX3 = indentStart + indentWidthPx / 2
 
                 moveTo(cR, 0f)
@@ -181,11 +180,11 @@ class IndentShape(
                     indentEnd - indentD1, 0f,
                     indentEnd, 0f
                 )
-                lineTo(w - cR, 0f)
+                lineTo(width - cR, 0f)
                 arcTo(
                     rect = Rect(
                         offset = Offset(
-                            w - cR,
+                            width - cR,
                             0f
                         ),
                         size = Size(cR, cR)
@@ -194,8 +193,8 @@ class IndentShape(
                     sweepAngleDegrees = 90f,
                     forceMoveTo = false
                 )
-                lineTo(w, h)
-                lineTo(0f, h)
+                lineTo(width, height)
+                lineTo(0f, height)
                 lineTo(0f, cR)
                 arcTo(
                     rect = Rect(
