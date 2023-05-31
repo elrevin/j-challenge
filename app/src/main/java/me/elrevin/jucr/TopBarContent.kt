@@ -231,7 +231,7 @@ fun TopBarContent(
             if (chargingTimeString == "CHARGE TIME LEFT: 49 MIN") {
                 chargingTimeStringBuilder.addStyle(
                     SpanStyle(fontWeight = FontWeight.Bold),
-                    23,
+                    18,
                     chargingTimeString.length
                 )
             } else {
