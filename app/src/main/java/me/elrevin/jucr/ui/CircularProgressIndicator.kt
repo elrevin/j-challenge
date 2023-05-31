@@ -19,13 +19,18 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
+/**
+ * Circular loading indicator
+ */
 @Composable
-fun Loader(
+fun CircularProgressIndicator(
     modifier: Modifier = Modifier,
 ) {
     val stroke = with(LocalDensity.current) {
         Stroke(width = 7.dp.toPx(), cap = StrokeCap.Butt)
     }
+
+    // Animation of rotation angle
     val transition = rememberInfiniteTransition()
     val baseRotation = transition.animateFloat(
         0f,
@@ -37,6 +42,8 @@ fun Loader(
             )
         )
     )
+
+
     Canvas(
         modifier
     ) {
@@ -59,9 +66,14 @@ private fun DrawScope.drawCircularIndicator(
     stroke: Stroke,
     rotation: Float
 ) {
-    val diameterOffset = stroke.width / 2
-    val arcDimen = size.width - 2 * diameterOffset
 
+    // Stroke thickness compensation
+    val diameterOffset = stroke.width / 2
+
+    // Width of arc
+    val arcWidth = size.width - 2 * diameterOffset
+
+    // Rotate indicator
     rotate(degrees = rotation) {
         drawArc(
             brush = Brush.sweepGradient(
@@ -74,18 +86,18 @@ private fun DrawScope.drawCircularIndicator(
             sweepAngle = sweep,
             useCenter = false,
             topLeft = Offset(diameterOffset, diameterOffset),
-            size = Size(arcDimen, arcDimen),
+            size = Size(arcWidth, arcWidth),
             style = stroke
         )
 
-        val point = GetPointCoords(size.width / 2f - diameterOffset, sweep ) +
+        // Neat round end of moving arc
+        val point = getPointCoords(size.width / 2f - diameterOffset, sweep ) +
                 Offset(size.width / 2, size.height / 2)
-
         drawCircle(gradientEnd, stroke.width / 2f, point)
     }
 }
 
-private fun GetPointCoords(radius: Float, angle: Float): Offset {
+private fun getPointCoords(radius: Float, angle: Float): Offset {
     val x = radius * Math.cos(Math.toRadians(angle.toDouble())).toFloat()
     val y = radius * Math.sin(Math.toRadians(angle.toDouble())).toFloat()
     return Offset(x, y)

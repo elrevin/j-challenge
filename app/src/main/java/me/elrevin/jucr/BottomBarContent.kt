@@ -12,6 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 
+/**
+ * Content within the bottom bar
+ */
 @Composable
 fun BottomBarContent () {
     Row(

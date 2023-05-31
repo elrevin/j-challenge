@@ -32,7 +32,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JUCRChallengeTheme {
-
                 TransparentSystemBars()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -51,6 +50,8 @@ fun TransparentSystemBars() {
     val useDarkIcons = !isSystemInDarkTheme()
 
     DisposableEffect(systemUiController, useDarkIcons) {
+
+        // Lets make system UI transparent
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
             darkIcons = useDarkIcons

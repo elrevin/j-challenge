@@ -2,7 +2,6 @@ package me.elrevin.jucr
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,7 +10,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -53,28 +51,38 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.elrevin.jucr.collapsable_topbar_scaffold.TopBarState
-import me.elrevin.jucr.ui.Loader
+import me.elrevin.jucr.ui.CircularProgressIndicator
 import me.elrevin.jucr.ui.theme.FontAwesome
 import kotlin.math.abs
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalAnimationGraphicsApi::class)
+/**
+ * Content of the collapsable top bar
+ *
+ * @param state State of the top bar
+ */
 @Composable
 fun TopBarContent(
     state: TopBarState
 ) {
+    // Current screen density
     val density = LocalDensity.current
+
+    // Width of the greating text element, it calculation is below
     var greetingsTextWidth: Dp by remember {
         mutableStateOf(0.dp)
     }
 
+    // Width of the charging indication text element
     var chargingTextWidth: Dp by remember {
         mutableStateOf(0.dp)
     }
 
+    // Width of the charging progress text element
     var chargingTimeTextWidth: Dp by remember {
         mutableStateOf(0.dp)
     }
 
+    // Radius of circles below the car image will be changing in animation
     val transition = rememberInfiniteTransition()
     val circlesRadiusChange = transition.animateFloat(
         0.5f,
@@ -88,6 +96,7 @@ fun TopBarContent(
         )
     )
 
+    // Centres of the circles will be changing too
     val circlesCenterChangeAngle = transition.animateFloat(
         0f,
         360f,
@@ -99,6 +108,7 @@ fun TopBarContent(
         )
     )
 
+    // The top bar resize coefficient
     val resizeValue = 1f - (state.getHeightInDp().value - state.collapsedHeight.value) /
             (state.expandedHeight.value - state.collapsedHeight.value)
 
@@ -107,6 +117,8 @@ fun TopBarContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
     ) {
+
+        // Draw the circles
         ConcentricCircles(
             maxWidth.value.toInt(),
             resizeValue,
@@ -114,24 +126,28 @@ fun TopBarContent(
             circlesCenterChangeAngle.value
         )
 
-        val greetingsTextX = (maxWidth - greetingsTextWidth) / 2
+        // Calculate of a position of the charging indication text element
         val chargingTextPosition = DpOffset(
             (maxWidth - chargingTextWidth) / 2,
             84.dp
         )
+
+        // Calculate of a position of the charging progress text element
         val chargingTimeTextPosition = DpOffset(
             (maxWidth - chargingTimeTextWidth) / 2,
             246.dp
         )
 
+        // Calculate of the car image's position
         val carPosition = DpOffset(
             (maxWidth - 246.dp) / 2,
             140.dp
         )
 
+        // Animate the greeting, when the top bar will start ro shrink in height, the greeting will be hidden
         AnimatedVisibility(
             modifier = Modifier
-                .offset(greetingsTextX, 58.dp)
+                .offset(chargingTextPosition.x, 58.dp)
                 .onGloballyPositioned {
                     if (greetingsTextWidth.value == 0f) {
                         greetingsTextWidth = with(density) {
@@ -150,6 +166,7 @@ fun TopBarContent(
             )
         }
 
+        // Change text of charging indication text element
         AnimatedContent(
             modifier = Modifier
                 .offset(
@@ -193,6 +210,7 @@ fun TopBarContent(
             contentScale = ContentScale.FillWidth
         )
 
+        // Change text of charging progress text element
         AnimatedContent(
             modifier = Modifier
                 .offset(
@@ -232,6 +250,7 @@ fun TopBarContent(
             )
         }
 
+        // Circular indicator of charging progress has to be hidden when the toolbar is going to be decreased in size.
         AnimatedVisibility(
             modifier = Modifier
                 .offset(maxWidth / 2 - 29.dp, state.getHeightInDp() - 74.dp),
@@ -244,7 +263,7 @@ fun TopBarContent(
                     .size(58.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Loader(
+                CircularProgressIndicator(
                     modifier = Modifier
                         .size(58.dp)
                         .alpha(0.7f)
@@ -270,6 +289,7 @@ fun TopBarContent(
             }
         }
 
+        // Expand button should appear hidden when the toolbar is going to be decreased in size.
         AnimatedVisibility(
             modifier = Modifier
                 .offset(maxWidth / 2 - 20.dp, state.getHeightInDp() - 44.dp),
@@ -309,6 +329,14 @@ fun TopBarContent(
     }
 }
 
+/**
+ * Animated concentric circles for the background of the top bar
+ *
+ * @param width Width of canvas
+ * @param resizeValue The top bar resize coefficient
+ * @param circlesRadiusChange Coefficient for circles' radius changing in animation
+ * @param circlesCenterChangeAngle Animated value of an angle for calculating the dynamic circles' centers offset
+ */
 @Composable
 private fun ConcentricCircles(
     width: Int,
@@ -318,27 +346,37 @@ private fun ConcentricCircles(
 ) {
     val circleColor = Color.White
     val halfWidth = width / 2
+
+    // calculate radius of the circles considering animated radius changing and
     val circleSizes = listOf(
-        ((halfWidth + 5 * circlesRadiusChange) - (halfWidth + 5) * 0.5f * resizeValue).dp,
+        ((halfWidth + 5  * circlesRadiusChange) - (halfWidth + 5 ) * 0.5f * resizeValue).dp,
         ((halfWidth - 10 * circlesRadiusChange) - (halfWidth - 10) * 0.5f * resizeValue).dp,
         ((halfWidth - 25 * circlesRadiusChange) - (halfWidth - 25) * 0.5f * resizeValue).dp,
         ((halfWidth - 40 * circlesRadiusChange) - (halfWidth - 40) * 0.5f * resizeValue).dp
     )
+
+    // Converting radius of all circles to px
     val circleSizesPx = with(LocalDensity.current) {
         circleSizes.map {
             it.toPx()
         }
     }
+
     val dotSize = 1.dp
     val dotCount = 90
 
     Canvas(modifier = Modifier.fillMaxSize()) {
+
+        // Calculate of offset of next circle
         val centerOffset = getPointCoords(50f, circlesCenterChangeAngle)
+
+        // calculate of the base center position
         val center = Offset(
             size.width / 2 + (size.width / 2) * resizeValue * 0.7f + centerOffset.x,
             size.height / 2 * 0.7f + centerOffset.y
         )
 
+        // calculate of center positions of all circles
         val centres = listOf<Offset>(
             center,
             Offset(
@@ -355,7 +393,7 @@ private fun ConcentricCircles(
             )
         )
 
-        val points = mutableListOf<Offset>()
+        // Draw circles by points
         circleSizes.forEachIndexed { index, radius ->
             val baseAlpha = 0.4f
             val angleIncrement = 360f / dotCount
@@ -363,11 +401,14 @@ private fun ConcentricCircles(
             for (i in 0 until dotCount) {
                 val angle = i * angleIncrement + angleOffset
 
+                // Points which placed nearby of top and bottom of circle must be more transparent
                 val alpha =
                     baseAlpha * if (angle <= 180f) abs(angle - 90f) / 90f else abs(angle - 270f) / 90f
 
+                // Get the point coordinates
                 val point = getPointCoords(radius.toPx(), angle) + centres[index]
-                points.add(point)
+
+                // Draw the point
                 drawCircle(
                     circleColor.copy(alpha), dotSize.toPx(), point
                 )

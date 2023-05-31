@@ -1,7 +1,6 @@
 package me.elrevin.jucr
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,16 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -38,6 +34,9 @@ import me.elrevin.jucr.ui.theme.Green
 import me.elrevin.jucr.ui.theme.Red
 import me.elrevin.jucr.ui.theme.Yellow
 
+/**
+ * Statistics bar on the screen
+ */
 @Composable
 fun Statistics() {
     StatisticsHeader()
@@ -55,7 +54,7 @@ fun Statistics() {
                 iconColor = Red,
                 iconDescription = "Car battery voltage",
                 icon = R.drawable.ic_car_battery,
-                label = "240 Volt",
+                value = "240 Volt",
                 hint = "Voltage"
             )
         }
@@ -64,7 +63,7 @@ fun Statistics() {
                 iconColor = Green,
                 iconDescription = "Car battery remaining charge",
                 icon = R.drawable.ic_battery_quarter,
-                label = "540 Km",
+                value = "540 Km",
                 hint = "Remaining charge"
             )
         }
@@ -73,13 +72,16 @@ fun Statistics() {
                 iconColor = Yellow,
                 iconDescription = "Fast charge",
                 icon = R.drawable.ic_plug,
-                label = "20 Min",
+                value = "20 Min",
                 hint = "Fast charge"
             )
         }
     }
 }
 
+/**
+ * Title for statistics bar
+ */
 @Composable
 private fun StatisticsHeader() {
     Row(
@@ -95,6 +97,8 @@ private fun StatisticsHeader() {
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
+
+        // We can't use IconButton because it doesn't give change color of indication
         Box(
             modifier = Modifier
                 .size(24.dp, 48.dp)
@@ -119,12 +123,21 @@ private fun StatisticsHeader() {
     }
 }
 
+/**
+ * Item of statistics list
+ *
+ * @param iconColor color of the icon and it's background
+ * @param iconDescription description text for the icon
+ * @param icon
+ * @param value Value of statistics item
+ * @param hint Explanation of statistics item
+ */
 @Composable
 fun StatisticsItem(
     iconColor: Color,
     iconDescription: String,
     icon: Int,
-    label: String,
+    value: String,
     hint: String
 ) {
     Column(
@@ -154,9 +167,9 @@ fun StatisticsItem(
             )
         }
 
-        Column() {
+        Column {
             Text(
-                text = label,
+                text = value,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )

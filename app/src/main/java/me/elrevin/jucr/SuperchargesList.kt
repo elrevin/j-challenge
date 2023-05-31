@@ -40,6 +40,11 @@ import androidx.compose.ui.unit.sp
 import me.elrevin.jucr.ui.theme.Gray
 import me.elrevin.jucr.ui.theme.Green
 
+/**
+ * List of supercharges
+ *
+ * @param listState State of the list
+ */
 @Composable
 fun ColumnScope.SuperchargesList(
     listState: LazyListState
@@ -66,6 +71,9 @@ fun ColumnScope.SuperchargesList(
     }
 }
 
+/**
+ * Row of header of the list
+ */
 @Composable
 private fun SuperchargesListHeader() {
     Row(
@@ -106,10 +114,24 @@ private fun SuperchargesListHeader() {
     }
 }
 
+/**
+ * Statuses of list items
+ * @property NORMAL Item is ordinary
+ * @property FAVORITE Item was marked as favorite
+ */
 enum class ListItemStatus {
     NORMAL, FAVORITE
 }
 
+/**
+ * Supercharges list's item
+ *
+ * @param name Name of a charge station
+ * @param availableCount Count of available charges
+ * @param totalCount Count of charges
+ * @param distance Distance from the user to the charge station
+ * @param status Status of the charge station
+ */
 @Composable
 fun ListItem(
     name: String,
