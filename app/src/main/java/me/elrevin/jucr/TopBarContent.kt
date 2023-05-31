@@ -222,13 +222,13 @@ fun TopBarContent(
                         it.size.width.toDp()
                     }
                 },
-            targetState = if (resizeValue < 0.5f) "TIME TO END OF CHARGE: 49 MIN" else "Charging: ⚡ 58%",
+            targetState = if (resizeValue < 0.5f) "CHARGE TIME LEFT: 49 MIN" else "Charging: ⚡ 58%",
             transitionSpec = {
                 fadeIn().togetherWith(fadeOut())
             }
         ) { chargingTimeString ->
             val chargingTimeStringBuilder = AnnotatedString.Builder(chargingTimeString)
-            if (chargingTimeString == "TIME TO END OF CHARGE: 49 MIN") {
+            if (chargingTimeString == "CHARGE TIME LEFT: 49 MIN") {
                 chargingTimeStringBuilder.addStyle(
                     SpanStyle(fontWeight = FontWeight.Bold),
                     23,

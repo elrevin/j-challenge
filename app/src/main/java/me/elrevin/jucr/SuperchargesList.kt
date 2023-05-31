@@ -85,7 +85,7 @@ private fun SuperchargesListHeader() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Nearby Sapercharges",
+            text = "Nearby Supercharges",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )

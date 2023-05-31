@@ -54,7 +54,7 @@ fun Statistics() {
                 iconColor = Red,
                 iconDescription = "Car battery voltage",
                 icon = R.drawable.ic_car_battery,
-                value = "240 Volt",
+                value = "240 Volts",
                 hint = "Voltage"
             )
         }
