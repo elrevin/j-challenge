@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,18 +17,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.elrevin.jucr.ui.theme.Gray
 import me.elrevin.jucr.ui.theme.Green
 import me.elrevin.jucr.ui.theme.Red
 import me.elrevin.jucr.ui.theme.Yellow
@@ -78,19 +85,31 @@ private fun StatisticsHeader() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, end = 26.dp, bottom = 10.dp, start = 26.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(top = 20.dp, end = 26.dp, bottom = 10.dp, start = 26.dp)
+            .height(48.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Text(
+            text = "Statistics",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Box(
-            modifier = Modifier.height(48.dp), contentAlignment = Alignment.CenterStart
+            modifier = Modifier
+                .size(24.dp, 48.dp)
+                .clickable(
+                    onClick = { },
+                    enabled = true,
+                    role = Role.Button,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 20.dp,
+                        color = Gray
+                    )
+                ), contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Statistics",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        IconButton(onClick = { /*TODO*/ }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_ellipsis),
                 contentDescription = "More options",
@@ -143,7 +162,10 @@ fun StatisticsItem(
             )
             Text(
                 text = hint,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 10.sp),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp
+                ),
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
