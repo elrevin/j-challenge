@@ -48,8 +48,8 @@ enum class TopBarValue {
  * @property scope - coroutine scope for an animation
  */
 class TopBarState(
-    private val expandedHeight: Dp,
-    private val collapsedHeight: Dp,
+    val expandedHeight: Dp,
+    val collapsedHeight: Dp,
     private val density: Density,
     private val scope: CoroutineScope
 ) {
@@ -62,7 +62,7 @@ class TopBarState(
     /**
      * Current value of the top bar state
      */
-    private val value = mutableStateOf(TopBarValue.EXPANDED)
+    val value = mutableStateOf(TopBarValue.EXPANDED)
 
     /**
      * Animatable value of height of the top bar

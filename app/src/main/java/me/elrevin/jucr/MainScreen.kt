@@ -15,7 +15,7 @@ import me.elrevin.jucr.collapsable_topbar_scaffold.rememberTopBarState
 @Composable
 fun MainScreen() {
     val topBarState = rememberTopBarState(
-        expandedHeight = 300.dp + 38.dp,
+        expandedHeight = 340.dp + 38.dp,
         collapsedHeight = 132.dp + 38.dp
     )
 
@@ -24,7 +24,7 @@ fun MainScreen() {
     CollapsableTopBarScaffold(
         modifier = Modifier.fillMaxSize(),
         topBarState = topBarState,
-        topBarContent = { TopBarContent() },
+        topBarContent = { TopBarContent(topBarState) },
         listState = listState,
         bottomBarContent = { BottomBarContent() }
     ) {
