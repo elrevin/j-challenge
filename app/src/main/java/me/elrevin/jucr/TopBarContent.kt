@@ -3,6 +3,12 @@ package me.elrevin.jucr
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -69,6 +75,30 @@ fun TopBarContent(
         mutableStateOf(0.dp)
     }
 
+    val transition = rememberInfiniteTransition()
+    val circlesRadiusChange = transition.animateFloat(
+        0.5f,
+        1.5f,
+        infiniteRepeatable(
+            animation = tween(
+                durationMillis = 10000,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    val circlesCenterChangeAngle = transition.animateFloat(
+        0f,
+        360f,
+        infiniteRepeatable(
+            animation = tween(
+                durationMillis = 20000,
+                easing = LinearEasing
+            )
+        )
+    )
+
     val resizeValue = 1f - (state.getHeightInDp().value - state.collapsedHeight.value) /
             (state.expandedHeight.value - state.collapsedHeight.value)
 
@@ -77,7 +107,12 @@ fun TopBarContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
     ) {
-        ConcentricCircles(maxWidth.value.toInt(), resizeValue)
+        ConcentricCircles(
+            maxWidth.value.toInt(),
+            resizeValue,
+            circlesRadiusChange.value,
+            circlesCenterChangeAngle.value
+        )
 
         val greetingsTextX = (maxWidth - greetingsTextWidth) / 2
         val chargingTextPosition = DpOffset(
@@ -173,12 +208,21 @@ fun TopBarContent(
             transitionSpec = {
                 fadeIn().togetherWith(fadeOut())
             }
-        ) {chargingTimeString ->
+        ) { chargingTimeString ->
             val chargingTimeStringBuilder = AnnotatedString.Builder(chargingTimeString)
             if (chargingTimeString == "TIME TO END OF CHARGE: 49 MIN") {
-                chargingTimeStringBuilder.addStyle(SpanStyle(fontWeight = FontWeight.Bold), 23, chargingTimeString.length)
+                chargingTimeStringBuilder.addStyle(
+                    SpanStyle(fontWeight = FontWeight.Bold),
+                    23,
+                    chargingTimeString.length
+                )
             } else {
-                chargingTimeStringBuilder.addStyle(SpanStyle(fontFamily = FontAwesome, fontSize = 8.sp), 10, 11)
+                chargingTimeStringBuilder.addStyle(
+                    SpanStyle(
+                        fontFamily = FontAwesome,
+                        fontSize = 8.sp
+                    ), 10, 11
+                )
             }
 
             Text(
@@ -210,13 +254,15 @@ fun TopBarContent(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "⚡",
+                    Text(
+                        text = "⚡",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontFamily = FontAwesome
                         ),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
-                    Text(text = "58%",
+                    Text(
+                        text = "58%",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -264,14 +310,19 @@ fun TopBarContent(
 }
 
 @Composable
-private fun ConcentricCircles(width: Int, resizeValue: Float) {
+private fun ConcentricCircles(
+    width: Int,
+    resizeValue: Float,
+    circlesRadiusChange: Float,
+    circlesCenterChangeAngle: Float
+) {
     val circleColor = Color.White
     val halfWidth = width / 2
     val circleSizes = listOf(
-        ((halfWidth + 5 ) - (halfWidth + 5 ) * 0.5f * resizeValue).dp,
-        ((halfWidth - 10) - (halfWidth - 10) * 0.5f * resizeValue).dp,
-        ((halfWidth - 25) - (halfWidth - 25) * 0.5f * resizeValue).dp,
-        ((halfWidth - 40) - (halfWidth - 40) * 0.5f * resizeValue).dp
+        ((halfWidth + 5 * circlesRadiusChange) - (halfWidth + 5) * 0.5f * resizeValue).dp,
+        ((halfWidth - 10 * circlesRadiusChange) - (halfWidth - 10) * 0.5f * resizeValue).dp,
+        ((halfWidth - 25 * circlesRadiusChange) - (halfWidth - 25) * 0.5f * resizeValue).dp,
+        ((halfWidth - 40 * circlesRadiusChange) - (halfWidth - 40) * 0.5f * resizeValue).dp
     )
     val circleSizesPx = with(LocalDensity.current) {
         circleSizes.map {
@@ -282,13 +333,26 @@ private fun ConcentricCircles(width: Int, resizeValue: Float) {
     val dotCount = 90
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val center = Offset(size.width / 2 + (size.width / 2) * resizeValue * 0.7f, size.height / 2 * 0.7f)
+        val centerOffset = getPointCoords(50f, circlesCenterChangeAngle)
+        val center = Offset(
+            size.width / 2 + (size.width / 2) * resizeValue * 0.7f + centerOffset.x,
+            size.height / 2 * 0.7f + centerOffset.y
+        )
 
         val centres = listOf<Offset>(
             center,
-            Offset(center.x + (circleSizesPx[0] - circleSizesPx[1]) * resizeValue, center.y + (circleSizesPx[0] - circleSizesPx[1]) * (1 - resizeValue)),
-            Offset(center.x + (circleSizesPx[0] - circleSizesPx[2]) * resizeValue, center.y + (circleSizesPx[0] - circleSizesPx[2]) * (1 - resizeValue)),
-            Offset(center.x + (circleSizesPx[0] - circleSizesPx[3]) * resizeValue, center.y + (circleSizesPx[0] - circleSizesPx[3]) * (1 - resizeValue))
+            Offset(
+                center.x + (circleSizesPx[0] - circleSizesPx[1]) * resizeValue,
+                center.y + (circleSizesPx[0] - circleSizesPx[1]) * (1 - resizeValue) * circlesRadiusChange
+            ),
+            Offset(
+                center.x + (circleSizesPx[0] - circleSizesPx[2]) * resizeValue,
+                center.y + (circleSizesPx[0] - circleSizesPx[2]) * (1 - resizeValue) * circlesRadiusChange
+            ),
+            Offset(
+                center.x + (circleSizesPx[0] - circleSizesPx[3]) * resizeValue,
+                center.y + (circleSizesPx[0] - circleSizesPx[3]) * (1 - resizeValue) * circlesRadiusChange
+            )
         )
 
         val points = mutableListOf<Offset>()
@@ -302,7 +366,7 @@ private fun ConcentricCircles(width: Int, resizeValue: Float) {
                 val alpha =
                     baseAlpha * if (angle <= 180f) abs(angle - 90f) / 90f else abs(angle - 270f) / 90f
 
-                val point = GetPointCoords(radius.toPx(), angle) + centres[index]
+                val point = getPointCoords(radius.toPx(), angle) + centres[index]
                 points.add(point)
                 drawCircle(
                     circleColor.copy(alpha), dotSize.toPx(), point
@@ -312,7 +376,7 @@ private fun ConcentricCircles(width: Int, resizeValue: Float) {
     }
 }
 
-private fun GetPointCoords(radius: Float, angle: Float): Offset {
+private fun getPointCoords(radius: Float, angle: Float): Offset {
     val x = radius * Math.cos(Math.toRadians(angle.toDouble())).toFloat()
     val y = radius * Math.sin(Math.toRadians(angle.toDouble())).toFloat()
     return Offset(x, y)
