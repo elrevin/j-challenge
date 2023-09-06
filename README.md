@@ -4,5 +4,9 @@ For your convenience, I have added a screen recording video below.
 
 Have a great day!
 
-https://github.com/elrevin/jucr-challenge/assets/8909121/fceaab7c-b015-41da-acf0-6266b0800c57
+
+
+https://github.com/elrevin/jucr-challenge/assets/8909121/ce055b2e-ddbd-402f-9e50-4cca1d4cc99b
+
+
 
